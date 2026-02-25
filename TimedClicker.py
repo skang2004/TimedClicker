@@ -35,24 +35,37 @@ def continuous_compare_and_click():
 
     try:
         user_time = datetime.strptime(f"{time_h}:{time_m}:{time_s}", "%H:%M:%S")
+        cmp_cnt = 0
         while True:
             current_time = datetime.now()
+            remaining_time = user_time - current_time
+
             if current_time.time() > user_time.time():
                 pyautogui.click(mouse_x, mouse_y)
                 print("Mouse clicked at saved position. Exiting program.")
                 exit()
-            time.sleep(0.01)  # Sleep for 1/100 second
+
+            cmp_cnt += 1
+            interval = 0.01  # 1/100 second
+            print_interval = 1/interval  # Print every 1 second
+            if cmp_cnt % print_interval == 0:
+                cmp_cnt = 0
+                hours, remainder = divmod(remaining_time.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                print(f"Remaining time: {hours} hours, {minutes} minutes, {seconds} seconds")
+
+            time.sleep(interval)  # Sleep for 1/100 second
     except Exception as e:
         print(f"Error: {e}")
 
-# Bind F8 key to save mouse position
-keyboard.add_hotkey('F8', save_mouse_position)
+# Function to execute all steps sequentially
+def execute_all():
+    save_mouse_position()
+    input_time()
+    continuous_compare_and_click()
 
-# Bind F9 key to input and save time
-keyboard.add_hotkey('F9', input_time)
-
-# Bind F10 key to continuously compare PC time and perform mouse click
-keyboard.add_hotkey('F10', continuous_compare_and_click)
+# Bind F7 key to execute all steps sequentially
+keyboard.add_hotkey('F10', execute_all)
 
 # Keep the program running
 keyboard.wait('esc')
