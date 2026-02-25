@@ -1,0 +1,58 @@
+import keyboard
+import pyautogui
+from datetime import datetime
+import time
+
+# Variables to store mouse position
+mouse_x, mouse_y = None, None
+
+# Variables to store user input
+time_h, time_m, time_s = None, None, None
+
+# Function to save mouse position
+def save_mouse_position():
+    global mouse_x, mouse_y
+    mouse_x, mouse_y = pyautogui.position()
+    print(f"Mouse position saved: X={mouse_x}, Y={mouse_y}")
+
+# Function to input and save time
+def input_time():
+    global time_h, time_m, time_s
+    try:
+        time_h = int(input("Enter hours: "))
+        time_m = int(input("Enter minutes: "))
+        time_s = int(input("Enter seconds: "))
+        print(f"Time saved: {time_h}:{time_m}:{time_s}")
+    except ValueError:
+        print("Invalid input. Please enter numeric values for time.")
+
+# Function to continuously compare PC time and perform mouse click
+def continuous_compare_and_click():
+    global time_h, time_m, time_s, mouse_x, mouse_y
+    if None in (time_h, time_m, time_s, mouse_x, mouse_y):
+        print("Please ensure all inputs are provided and mouse position is saved.")
+        return
+
+    try:
+        user_time = datetime.strptime(f"{time_h}:{time_m}:{time_s}", "%H:%M:%S")
+        while True:
+            current_time = datetime.now()
+            if current_time.time() > user_time.time():
+                pyautogui.click(mouse_x, mouse_y)
+                print("Mouse clicked at saved position. Exiting program.")
+                exit()
+            time.sleep(0.01)  # Sleep for 1/100 second
+    except Exception as e:
+        print(f"Error: {e}")
+
+# Bind F8 key to save mouse position
+keyboard.add_hotkey('F8', save_mouse_position)
+
+# Bind F9 key to input and save time
+keyboard.add_hotkey('F9', input_time)
+
+# Bind F10 key to continuously compare PC time and perform mouse click
+keyboard.add_hotkey('F10', continuous_compare_and_click)
+
+# Keep the program running
+keyboard.wait('esc')
